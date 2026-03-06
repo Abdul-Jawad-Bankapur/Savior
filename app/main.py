@@ -4,6 +4,8 @@ from fastapi import FastAPI, WebSocket, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from twilio.twiml.voice_response import VoiceResponse, Connect
 
+from app.services.stt_service import DeepgramService
+
 app = FastAPI(title="SAVIOR - Situational Analysis & Virtual Intelligent Operational Router")
 
 # Configure CORS for the React Frontend
@@ -14,6 +16,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def transcript_callback(transcript: str):
+    """Callback function when Deepgram returns a transcript."""
+    print(f"Transcript: {transcript}")
+    # TODO (Phase 2): Send transcript to Situational Analysis pipeline
+    # TODO (Phase 3): Push to React Dashboard via WebSockets
 
 @app.get("/")
 async def root():
@@ -28,15 +36,19 @@ async def handle_voice_call(request: Request):
     """
     response = VoiceResponse()
     
-    # <Connect> tells Twilio to start streaming audio to our WebSocket
-    # The 'url' must be your public server's WebSocket address (e.g., wss://your-domain.com/ws/twilio)
+    # Start the stream immediately
+    host = request.url.hostname
     connect = Connect()
-    connect.stream(url=f"wss://{request.url.hostname}/ws/twilio")
+    connect.stream(url=f"wss://{host}/ws/twilio")
     response.append(connect)
     
-    # Stay on the line (placeholder while the stream is active)
-    response.say("SAVIOR Emergency System is monitoring this call.")
-    response.pause(length=10) # Adjust as needed for long calls
+    # Intro message
+    response.say("SAVIOR Emergency System is active. Please state your emergency.")
+    
+    # Keep the TwiML executing so the call doesn't hang up
+    # This creates a 5-minute window for the call
+    for _ in range(30):
+        response.pause(length=10)
     
     return Response(content=str(response), media_type="text/xml")
 
@@ -48,10 +60,14 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("WebSocket connection established with Twilio.")
     
+    # Initialize Deepgram Service
+    dg_service = DeepgramService(transcript_callback)
+    if not await dg_service.start():
+        await websocket.close()
+        return
+
     try:
         while True:
-            # Twilio sends data in JSON chunks over the WebSocket
-            # Format: {'event': 'media', 'media': {'payload': 'base64_encoded_audio', ...}, ...}
             message = await websocket.receive_text()
             data = json.loads(message)
             
@@ -59,12 +75,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 print(f"Stream starting: {data['start']['streamSid']}")
             
             elif data['event'] == 'media':
-                # Extract the base64-encoded audio payload
+                # Extract the base64-encoded audio payload (mulaw, 8000Hz)
                 payload = data['media']['payload']
                 audio_chunk = base64.b64decode(payload)
                 
-                # TODO (Phase 1): Pass audio_chunk to Deepgram STT
-                # print(f"Received audio chunk: {len(audio_chunk)} bytes")
+                # Send the decoded chunk to Deepgram for real-time STT
+                dg_service.send_audio(audio_chunk)
                 
             elif data['event'] == 'stop':
                 print("Twilio stream stopped.")
@@ -73,6 +89,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"WebSocket Error: {e}")
     finally:
+        dg_service.stop()
         await websocket.close()
 
 if __name__ == "__main__":

@@ -10,7 +10,8 @@ auth_token = os.getenv("TWILIO_AUTH_TOKEN")
 client = Client(account_sid, auth_token)
 
 # 1. REPLACE WITH YOUR NGROK URL (e.g., https://abc-123.ngrok-free.app)
-PUBLIC_URL = "https://threatenedly-unpredicative-louis.ngrok-free.dev/" 
+# Note: Ensure NO trailing slash in the string or use .rstrip("/")
+PUBLIC_URL = "https://threatenedly-unpredicative-louis.ngrok-free.dev".rstrip("/")
 
 # 2. REPLACE WITH YOUR ACTUAL PHONE NUMBER (Verified in Twilio Console)
 TO_NUMBER = "+918970732147"
