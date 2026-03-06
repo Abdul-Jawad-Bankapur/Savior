@@ -9,6 +9,11 @@ ENV/
 
 # Secrets
 .env
+secrate.txt
+
+# Binaries
+*.exe
+ngrok.exe
 
 # IDEs
 .vscode/
