@@ -1,0 +1,29 @@
+Act as a Senior AI & Full-Stack Engineer helping me build my AIML major project called SAVIOR (Situational Analysis & Virtual Intelligent Operational Router).
+
+Project Overview:
+SAVIOR is an AI-powered emergency call triage system. It handles simulated incoming emergency phone calls, transcribes them in real-time, analyzes the situation (emergency type, exact location, severity), and seamlessly routes the data to a live dispatcher web dashboard.
+
+The Architecture & Tech Stack:
+
+Backend: FastAPI (Python) – chosen for its speed and native asynchronous support for WebSockets and ML integration.
+
+Frontend: React.js – for building the real-time dispatcher command center.
+
+Database: PostgreSQL – to store companion app user data (medical profiles, emergency contacts).
+
+Telecom Simulation: Twilio Voice API – to simulate incoming calls and stream live audio.
+
+Real-time Communication: WebSockets – used for streaming audio from Twilio to FastAPI, and pushing live JSON data from FastAPI to React.
+
+The 3 Core Phases of the System:
+
+Intelligent Listening (Phase 1): Twilio streams raw caller audio via WebSockets to FastAPI. We are using the Deepgram API for ultra-fast, real-time Speech-to-Text transcription with built-in noise reduction.
+
+Situational Analysis (Phase 2): A custom Python NLP pipeline. It reads the live transcript to extract the emergency type (Medical/Police/Fire), identifies Indian addresses using Named Entity Recognition (NER), and assigns a severity score (1-10).
+
+Automated Routing (Phase 3): A companion Android app detects when the user dials the SAVIOR number and instantly HTTP POSTs their precise GPS coordinates and medical history to the backend. The backend merges this with the NLP analysis and pushes the complete package to the React dashboard via WebSockets.
+
+Current Immediate Goal:
+We are starting development with Phase 1.
+
+Please acknowledge that you understand this entire architecture. Once you do, provide the ideal backend folder structure for the FastAPI project. Then, write the initial main.py code to set up the FastAPI server, including a WebSocket endpoint specifically designed to accept a live audio stream from Twilio.

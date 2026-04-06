@@ -1,0 +1,110 @@
+.arch-section {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: 6rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.arch-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.arch-title {
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.4rem;
+}
+
+.arch-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.15em;
+}
+
+.arch-pipeline {
+  max-width: 650px;
+  width: 100%;
+}
+
+.arch-flow {
+  opacity: 0;
+}
+
+.arch-node {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--node-color);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.arch-node:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--node-color);
+  transform: translateX(4px);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.node-step {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--node-color);
+  min-width: 28px;
+}
+
+.node-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.node-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}
+
+.node-tech {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.arch-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0;
+  position: relative;
+  margin-left: 1.5rem;
+}
+
+.conn-line {
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(to bottom, var(--conn-color), transparent);
+}
+
+.conn-arrow {
+  font-size: 0.7rem;
+  color: var(--conn-color);
+  margin-top: -3px;
+}
+
+@media (max-width: 768px) {
+  .arch-section {
+    padding: 4rem 1rem;
+  }
+}
