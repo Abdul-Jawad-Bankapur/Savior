@@ -50,7 +50,7 @@ class DeepgramService:
                     if alternatives:
                         transcript = alternatives[0].get("transcript", "")
                         if transcript:
-                            self.callback(transcript)
+                           await self.callback(transcript)
                             
         except Exception as e:
             print(f"Deepgram listener stopped: {e}")
