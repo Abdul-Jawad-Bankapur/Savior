@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAVIOR SOS</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #ef4444; /* Emergency Red */
+            color: white; 
+            padding-top: 50px; 
+            margin: 0;
+        }
+        .container { padding: 20px; }
+        button { 
+            background-color: white; 
+            color: #ef4444; 
+            border: none; 
+            padding: 20px 40px; 
+            font-size: 20px; 
+            font-weight: bold; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            width: 80%;
+            max-width: 300px;
+        }
+        button:active { transform: scale(0.95); }
+        #status { margin-top: 30px; font-size: 16px; font-weight: bold; padding: 0 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 SAVIOR SOS</h1>
+        <p>Emergency Dispatch needs your exact location to send help.</p>
+        <br>
+        <button id="helpBtn" onclick="sendRealLocation()">SHARE LOCATION</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // ⚠️ CRITICAL: Replace this with your CURRENT Ngrok URL!
+        // It MUST start with wss:// instead of https://
+        const NGROK_URL = "wss://dronish-backdoor-buck.ngrok-free.dev"; 
+        
+        // This is your test number that the React dashboard is listening for
+        const PHONE_NUMBER = "+919113896575"; 
+        
+        const wsUri = `${NGROK_URL}/ws/location/${PHONE_NUMBER}`;
+
+        function sendRealLocation() {
+            const statusDiv = document.getElementById('status');
+            const btn = document.getElementById('helpBtn');
+
+            if (!navigator.geolocation) {
+                statusDiv.innerText = "Geolocation is not supported by your browser.";
+                return;
+            }
+
+            statusDiv.innerText = "Acquiring GPS signal...";
+            btn.innerText = "LOCATING...";
+            btn.disabled = true;
+
+            // Pops up the "Allow Location" prompt on your phone
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    statusDiv.innerText = `GPS Locked. Transmitting...`;
+
+                    // Connect to your FastAPI WebSocket
+                    const ws = new WebSocket(wsUri);
+
+                    ws.onopen = () => {
+                        const locationData = { lat: lat, lng: lng };
+                        ws.send(JSON.stringify(locationData)); 
+                        
+                        statusDiv.innerText = "✅ Location securely sent to Dispatch!";
+                        btn.innerText = "HELP IS ON THE WAY";
+                        ws.close();
+                    };
+
+                    ws.onerror = (error) => {
+                        statusDiv.innerText = "❌ Connection failed. Check Ngrok URL.";
+                        btn.innerText = "TRY AGAIN";
+                        btn.disabled = false;
+                    };
+                },
+                (error) => {
+                    statusDiv.innerText = `❌ Error: Please allow location permissions in your browser.`;
+                    btn.innerText = "TRY AGAIN";
+                    btn.disabled = false;
+                },
+                { enableHighAccuracy: true } // Forces the phone to use the GPS hardware
+            );
+        }
+    </script>
+</body>
+</html>
